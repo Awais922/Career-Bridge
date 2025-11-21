@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Career Bridge</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#2563EB', // Royal Blue
+                        secondary: '#1E40AF',
+                        accent: '#F59E0B',
+                        dark: '#0F172A',
+                        light: '#F8FAFC',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Form Transitions */
+        .form-transition { transition: all 0.3s ease-in-out; }
+        .hidden-form { display: none; }
+        
+        /* Loader */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #2563EB;
+            width: 20px;
+            height: 20px;
+            -webkit-animation: spin 1s linear infinite;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- ANIMATIONS FOR LEFT PANEL --- */
+
+        /* 1. Background Shapes Movement */
+        .bg-icon {
+            position: absolute;
+            color: white;
+            opacity: 0.15; /* Increased visibility slightly */
+            animation: float linear infinite;
+            z-index: 0;
+        }
+
+        /* Specific Icons Configuration - Faster Speeds & Random Positions */
+        /* Top Area */
+        .icon-1 { top: 10%; left: 10%; font-size: 6rem; animation-duration: 14s; animation-delay: 0s; }
+        .icon-2 { top: 15%; left: 60%; font-size: 4rem; animation-duration: 18s; animation-delay: -2s; }
+        
+        /* Middle Area */
+        .icon-3 { top: 45%; left: 85%; font-size: 5rem; animation-duration: 15s; animation-delay: -5s; }
+        .icon-4 { top: 50%; left: 5%; font-size: 4.5rem; animation-duration: 12s; animation-delay: -8s; }
+        
+        /* Bottom Area */
+        .icon-5 { top: 80%; left: 20%; font-size: 5.5rem; animation-duration: 16s; animation-delay: -3s; }
+        .icon-6 { top: 75%; left: 70%; font-size: 7rem; animation-duration: 20s; animation-delay: -1s; }
+        
+        /* Fillers */
+        .icon-7 { top: 30%; left: 35%; font-size: 3rem; animation-duration: 10s; animation-delay: -7s; opacity: 0.1; }
+        .icon-8 { top: 60%; left: 50%; font-size: 3.5rem; animation-duration: 13s; animation-delay: -4s; opacity: 0.1; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(40px, -40px) rotate(10deg); }
+            50% { transform: translate(0, -80px) rotate(0deg); }
+            75% { transform: translate(-40px, -40px) rotate(-10deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        /* 2. Text Entrance Animation */
+        .slide-up-fade {
+            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 3. Glassmorphism Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-light font-sans text-slate-700 h-screen overflow-hidden flex">
+
+    <!-- LEFT SIDE: Animated & Professional -->
+    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary to-secondary relative items-center justify-center text-white overflow-hidden">
+        
+        <!-- Animated Background Icons -->
+        <!-- 1. Atom (Science/Core) - Replaced Brain -->
+        <i class="fa-solid fa-atom bg-icon icon-1"></i>
+        <!-- 2. Network (Connectivity) -->
+        <i class="fa-solid fa-network-wired bg-icon icon-2"></i>
+        <!-- 3. Microchip (Hardware) -->
+        <i class="fa-solid fa-microchip bg-icon icon-3"></i>
+        <!-- 4. Laptop Code (Dev) -->
+        <i class="fa-solid fa-laptop-code bg-icon icon-4"></i>
+        <!-- 5. Rocket (Growth) -->
+        <i class="fa-solid fa-rocket bg-icon icon-5"></i>
+        <!-- 6. Database (Data) -->
+        <i class="fa-solid fa-database bg-icon icon-6"></i>
+        <!-- 7. Cloud (Infrastructure) -->
+        <i class="fa-solid fa-cloud bg-icon icon-7"></i>
+        <!-- 8. Mobile (App Dev) -->
+        <i class="fa-solid fa-mobile-screen bg-icon icon-8"></i>
+        
+        <!-- Content Container with Glass Effect -->
+        <div id="left-panel-content" class="relative z-10 max-w-lg px-10 text-center slide-up-fade">
+            <div class="mb-8 flex justify-center">
+                <div class="w-20 h-20 glass-card rounded-2xl flex items-center justify-center text-4xl shadow-2xl text-white">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+            </div>
+            <!-- DYNAMIC TEXT ELEMENTS -->
+            <h2 id="left-title" class="text-4xl font-bold mb-6 tracking-tight">Welcome Back!</h2>
+            <div class="h-1 w-20 bg-accent mx-auto mb-6 rounded-full"></div>
+            <p id="left-quote" class="text-blue-50 text-lg leading-relaxed font-light">
+                "Success is not the key to happiness. Happiness is the key to success. If you love what you are doing, you will be successful."
+            </p>
+        </div>
+        
+        <!-- Subtle Gradient Overlay -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none z-0"></div>
+    </div>
+
+    <!-- RIGHT SIDE: Forms -->
+    <div class="w-full lg:w-1/2 h-full overflow-y-auto bg-white flex flex-col">
+        
+        <div class="p-6">
+            <a href="index.html" class="text-slate-500 hover:text-primary font-medium flex items-center gap-2 text-sm transition">
+                <i class="fa-solid fa-arrow-left"></i> Explore as guest
+            </a>
+        </div>
+
+        <div class="flex-grow flex items-center justify-center p-6 sm:p-12">
+            <div class="w-full max-w-md space-y-8">
+                
+                <div class="text-center">
+                    <h2 id="form-title" class="text-3xl font-bold text-dark">Log in to your account</h2>
+                    <p id="form-subtitle" class="mt-2 text-slate-500">Welcome back! Please enter your details.</p>
+                </div>
+
+                <!-- LOGIN FORM -->
+                <form id="login-form" class="space-y-6" onsubmit="handleLogin(event)">
+                    <div>
+                        <label for="login-username" class="block text-sm font-medium text-slate-700">Username</label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa-regular fa-user text-slate-400"></i>
+                            </div>
+                            <input type="text" id="login-username" class="focus:ring-primary focus:border-primary block w-full pl-10 py-3 sm:text-sm border-gray-300 rounded-lg bg-slate-50 border hover:bg-white transition" placeholder="Enter your username" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
+                        </div>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-lock text-slate-400"></i>
+                            </div>
+                            <input type="password" id="password" class="focus:ring-primary focus:border-primary block w-full pl-10 py-3 sm:text-sm border-gray-300 rounded-lg bg-slate-50 border hover:bg-white transition" placeholder="••••••••" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="login-btn" class="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition transform hover:-translate-y-0.5">
+                        Sign In
+                    </button>
+                </form>
+
+                <!-- SIGNUP FORM -->
+                <form id="signup-form" class="space-y-6 hidden-form" onsubmit="handleSignup(event)">
+                    
+                    <!-- Full Name Field -->
+                    <div>
+                        <label for="signup-name" class="block text-sm font-medium text-slate-700">Full Name</label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa-regular fa-user text-slate-400"></i>
+                            </div>
+                            <input type="text" id="signup-name" class="focus:ring-primary focus:border-primary block w-full pl-10 py-3 sm:text-sm border-gray-300 rounded-lg bg-slate-50 border hover:bg-white transition" placeholder="Ali Khan" required>
+                        </div>
+                    </div>
+
+                    <!-- Username Field -->
+                    <div>
+                        <label for="signup-username" class="block text-sm font-medium text-slate-700">Username</label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-at text-slate-400"></i>
+                            </div>
+                            <input type="text" id="signup-username" class="focus:ring-primary focus:border-primary block w-full pl-10 py-3 sm:text-sm border-gray-300 rounded-lg bg-slate-50 border hover:bg-white transition" placeholder="ali123" required>
+                        </div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div>
+                        <label for="signup-password" class="block text-sm font-medium text-slate-700">Create Password</label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-lock text-slate-400"></i>
+                            </div>
+                            <input type="password" id="signup-password" class="focus:ring-primary focus:border-primary block w-full pl-10 py-3 sm:text-sm border-gray-300 rounded-lg bg-slate-50 border hover:bg-white transition" placeholder="Min 6 chars" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="signup-btn" class="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition transform hover:-translate-y-0.5">
+                        Create Account
+                    </button>
+                </form>
+
+                <!-- Toggle -->
+                <div class="text-center mt-6">
+                    <p class="text-sm text-slate-600">
+                        <span id="toggle-text">Don't have an account?</span>
+                        <button onclick="toggleForms()" class="font-bold text-primary hover:text-secondary ml-1 focus:outline-none">
+                            <span id="toggle-btn-text">Sign Up</span>
+                        </button>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- SUPABASE LOGIC -->
+    <script>
+        const supabaseUrl = 'https://sbytszsxhkzehqrxgjrl.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNieXRzenN4aGt6ZWhxcnhnanJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTkwNTUsImV4cCI6MjA3OTIzNTA1NX0.Nm6Ig-M7eYtPB30O9jicqIg48Wont4uY4Kz2_3ibZ0c';
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const formTitle = document.getElementById('form-title');
+        const formSubtitle = document.getElementById('form-subtitle');
+        const toggleText = document.getElementById('toggle-text');
+        const toggleBtnText = document.getElementById('toggle-btn-text');
+        
+        // New Dynamic Elements
+        const leftTitle = document.getElementById('left-title');
+        const leftQuote = document.getElementById('left-quote');
+        const leftPanelContent = document.getElementById('left-panel-content');
+
+        let isLogin = true;
+
+        function toggleForms() {
+            isLogin = !isLogin;
+            
+            // Trigger Re-Animation
+            leftPanelContent.classList.remove('slide-up-fade');
+            void leftPanelContent.offsetWidth; // Trigger reflow
+            leftPanelContent.classList.add('slide-up-fade');
+
+            if (isLogin) {
+                // SWITCH TO LOGIN
+                loginForm.classList.remove('hidden-form');
+                signupForm.classList.add('hidden-form');
+                
+                // Update Form Header
+                formTitle.innerText = "Log in to your account";
+                formSubtitle.innerText = "Welcome back! Please enter your details.";
+                toggleText.innerText = "Don't have an account?";
+                toggleBtnText.innerText = "Sign Up";
+
+                // Update Left Side Panel
+                leftTitle.innerText = "Welcome Back!";
+                leftQuote.innerText = "\"Success is not the key to happiness. Happiness is the key to success. If you love what you are doing, you will be successful.\"";
+            } else {
+                // SWITCH TO SIGNUP
+                loginForm.classList.add('hidden-form');
+                signupForm.classList.remove('hidden-form');
+                
+                // Update Form Header
+                formTitle.innerText = "Create an account";
+                formSubtitle.innerText = "Start your journey with Career Bridge today.";
+                toggleText.innerText = "Already have an account?";
+                toggleBtnText.innerText = "Log In";
+
+                // Update Left Side Panel
+                leftTitle.innerText = "Join the Future";
+                leftQuote.innerText = "\"The future belongs to those who believe in the beauty of their dreams. Join our community and build your path to professional excellence.\"";
+            }
+        }
+
+        // --- SIGNUP LOGIC (AUTO-EMAIL) ---
+        async function handleSignup(e) {
+            e.preventDefault();
+            const name = document.getElementById('signup-name').value;
+            const username = document.getElementById('signup-username').value.trim().toLowerCase(); 
+            const password = document.getElementById('signup-password').value;
+            const btn = document.getElementById('signup-btn');
+            
+            const generatedEmail = `${username}@careerbridge.com`;
+
+            const originalText = btn.innerText;
+            btn.innerHTML = '<div class="loader"></div>';
+            btn.disabled = true;
+
+            try {
+                // 1. Check Username
+                const { data: existingUser, error: checkError } = await supabaseClient
+                    .from('profiles')
+                    .select('username')
+                    .eq('username', username)
+                    .single();
+
+                if (existingUser) {
+                    throw new Error("Username already taken. Please choose another.");
+                }
+
+                // 2. Sign up
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: generatedEmail,
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: name,
+                            username: username
+                        }
+                    }
+                });
+
+                if (error) throw error;
+
+                alert("Account created successfully! You can now log in.");
+                toggleForms(); 
+                
+            } catch (error) {
+                alert("Signup Error: " + error.message);
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // --- LOGIN LOGIC ---
+        async function handleLogin(e) {
+            e.preventDefault();
+            const usernameInput = document.getElementById('login-username').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('login-btn');
+
+            const originalText = btn.innerText;
+            btn.innerHTML = '<div class="loader"></div>';
+            btn.disabled = true;
+
+            try {
+                // 1. Find Email
+                const { data, error: profileError } = await supabaseClient
+                    .from('profiles')
+                    .select('email')
+                    .eq('username', usernameInput)
+                    .single();
+
+                if (profileError || !data) {
+                    throw new Error("Username not found.");
+                }
+
+                // 2. Sign In
+                const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
+                    email: data.email,
+                    password: password,
+                });
+
+                if (authError) throw authError;
+
+                window.location.href = 'index.html';
+                
+            } catch (error) {
+                alert("Login Failed: " + error.message);
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
